@@ -27,7 +27,7 @@ module ParallelCPU8_Signed (
                XOR = 4'h8, ANI = 4'h9, NOT = 4'hA, SLL = 4'hB,
                SRL = 4'hC, SLI = 4'hD, SRI = 4'hE, OUT = 4'hF;
 
-    always @(posedge clk or posedge reset) begin
+    always @(posedge clk) begin
         if (reset) begin
             acc <= 8'h00;
             out_port <= 8'h00;
