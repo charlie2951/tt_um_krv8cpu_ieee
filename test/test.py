@@ -3,37 +3,37 @@
 
 import cocotb
 from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge, Timer
+from cocotb.triggers import RisingEdge, Timer, ReadOnly
 
 @cocotb.test()
 async def test_cpu_signed_operations(dut):
     """Replicating Verilog Testbench cases for Signed CPU on TinyTapeout Hardware"""
 
     # --- Setup ---
-    # Start clock (10ns period = 100MHz)
-    cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
+    # Fix: Rename 'units' to 'unit'
+    cocotb.start_soon(Clock(dut.clk, 10, unit="ns").start())
 
-    # Initialize Inputs
     dut.ena.value = 1
     dut.ui_in.value = 0
     dut.uio_in.value = 0
-    dut.rst_n.value = 0 # Active Low Reset
+    dut.rst_n.value = 0 
     
-    # Wait 15ns (as per Verilog #15)
-    await Timer(15, units="ns")
+    # Fix: Rename 'units' to 'unit'
+    await Timer(15, unit="ns")
     dut.rst_n.value = 1
     await RisingEdge(dut.clk)
 
-    # Helper function for pin mapping: ui_in=High, uio_in=Low
     async def run_instr(instr_hex, label):
         dut.ui_in.value = (instr_hex >> 8) & 0xFF
         dut.uio_in.value = instr_hex & 0xFF
         await RisingEdge(dut.clk)
         
-        # Access internal signals for the $monitor equivalent log
-        # Assuming the CPU instance inside the wrapper is named 'krv8cpu'
+        # FIX: Wait for the logic to settle before reading
+        await ReadOnly() 
+        
+        # Fix: Use to_signed() instead of signed_integer
         acc_raw = dut.user_project.cpu0.acc.value
-        acc_dec = acc_raw.signed_integer
+        acc_dec = acc_raw.to_signed()
         x1_val  = dut.user_project.cpu0.registers[1].value
         out_val = dut.uo_out.value
         
@@ -41,20 +41,18 @@ async def test_cpu_signed_operations(dut):
 
     dut._log.info("--- Starting Test Cases ---")
 
-    # --- TEST 1: Positive Sign Extension ---
-    # Op: 1 (LDI), Imm: 6'b000101 (5) -> 0x1005
+    # TEST 1
     await run_instr(0x1005, "LDI 5")
-    assert dut.user_project.cpu0.acc.value == 0x05
+    # FIX: Check against the decimal value 5 or integer
+    assert dut.user_project.cpu0.acc.value.integer == 5, f"Expected 5, got {dut.user_project.cpu0.acc.value.integer}"
 
-    # --- TEST 2: Negative Sign Extension ---
-    # Op: 1 (LDI), Imm: 6'b111110 (-2) -> 0x103E
+    # TEST 2
     await run_instr(0x103E, "LDI -2")
-    assert dut.user_project.cpu0.acc.value.signed_integer == -2
+    assert dut.user_project.cpu0.acc.value.to_signed() == -2
 
-    # --- TEST 3: Signed Addition (Negative + Positive) ---
-    # Current ACC = -2, ADI 5 -> 0x3005
+    # TEST 3
     await run_instr(0x3005, "ADI 5")
-    assert dut.user_project.cpu0.acc.value.signed_integer == 3
+    assert dut.user_project.cpu0.acc.value.to_signed() == 3
 
     # --- TEST 4: Store and Subtraction ---
     # STA x1 -> 0x4400
