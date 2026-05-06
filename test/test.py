@@ -8,7 +8,7 @@ from cocotb.triggers import RisingEdge, Timer
 
 @cocotb.test()
 async def cpu_basic_test(dut):
-    """Test all major operations of the ParallelCPU8_Signed"""
+    """Test all major operations of the cpu"""
 
     # Start the clock (10ns period = 100MHz)
     cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
