@@ -1,4 +1,4 @@
-module ParallelCPU8_Signed (
+module krv8cpu (
     input wire clk,
     input wire reset,
     input wire [15:0] instruction, 
