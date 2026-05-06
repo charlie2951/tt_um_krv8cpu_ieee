@@ -5,7 +5,7 @@ module krv8cpu (
     output reg [7:0] out_port      
 );
 
-    // Register File and Accumulator
+    // Register Files and Accumulator
     reg [7:0] registers [3:0];
     reg [7:0] acc; 
 
