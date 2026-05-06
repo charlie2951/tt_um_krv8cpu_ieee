@@ -14,11 +14,11 @@ async def cpu_basic_test(dut):
     cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
 
     # --- Reset Phase ---
-    dut.reset.value = 1
+    dut.rst_n.value = 1
     dut.instruction.value = 0
     await RisingEdge(dut.clk)
     await RisingEdge(dut.clk)
-    dut.reset.value = 0
+    dut.rst_n.value = 0
     await RisingEdge(dut.clk)
 
     # Helper function to send instruction and wait for execution
