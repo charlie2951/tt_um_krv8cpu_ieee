@@ -33,21 +33,26 @@ The CPU contains five internal 8-bit registers:<p>
 ### Instruction Set Architecture (ISA)
 Instructions are 16 bits wide, ensuring a simple decode stage. <p>
 The format is:<p>
-`[15:12] Opcode | [11:10] rs1 | [9:6] Reserved | [5:0] Immediate (Sign-Extended)`
+`[15:12] Opcode | [11:10] rs1 | [9:8] Reserved | [7:0] Immediate (Sign-Extended)`
 ### CPU Instruction Set Architecture (ISA)
 
 | Opcode | Mnemonic | Operation | Description |
 | :---: | :---: | :---: | :--- |
 | `4'h0` | **SLT** | ACC = (ACC < rs1) ? 1 : 0 | Signed "Set Less Than" comparison. |
-| `4'h1` | **LDI** | ACC = sext(imm) | Load 6-bit sign-extended immediate. |
+| `4'h1` | **LDI** | ACC = sext(imm) | Load 8-bit sign-extended immediate. |
 | `4'h2` | **ADD** | ACC = ACC + rs1 | Add register to Accumulator. |
 | `4'h3` | **ADI** | ACC = ACC + sext(imm) | Add sign-extended immediate. |
-| `4'h4` | **STA** | rs1 = ACC | Store Accumulator into register (excludes $x0$). |
+| `4'h4` | **STA** | rs1 = ACC | Store Accumulator into register (excludes x0). |
 | `4'h5` | **SUB** | ACC = ACC - rs1 | Subtract register from Accumulator. |
 | `4'h6` | **AND** | ACC = ACC & rs1 | Bitwise AND with register. |
+| `4'h7` | **OR** | ACC = ACC | rs1 | Bitwise OR with register. |
+| `4'h8` | **XOR** | ACC = ACC ^ rs1 | Bitwise XOR with register. |
 | `4'h9` | **ANI** | ACC = ACC & imm | Bitwise AND with 8-bit raw immediate. |
+| `4'hA` | **NOT** | ACC = ~ACC  | Complement of accumulator. |
 | `4'hB` | **SLL** |ACC = ACC << rs1[2:0]| Logical Shift Left by register value. |
+| `4'hC` | **SRL** |ACC = ACC >> rs1[2:0]| Logical Shift Right by register value. |
 | `4'hD` | **SLI** | ACC = ACC << imm[2:0] | Logical Shift Left by immediate. |
+| `4'hE` | **SRI** | ACC = ACC >> imm[2:0] | Logical Shift Right by immediate. |
 | `4'hF` | **OUT** | Port = ACC | Output Accumulator to parallel hardware port. |
 
 ### Hardware Implementation Details
@@ -62,7 +67,7 @@ The CPU operates on a single-phase clock.
 
 Rising Edge: The current instruction is sampled.
 
-Propagation: The ALU computes the result and the Register File selects operands.
+Propagation: The ALU computes the result, and the Register File selects operands.
 
 Next Rising Edge: The result is latched into the ACC or the destination register.
 ## How to test
@@ -71,4 +76,4 @@ Apply 16-bit instruction code at the input via switches. The process may be auto
 
 ## External hardware
 
-MCU or FPGA for providing the 16 bit input (instruction code) to CPU. Input may be applied via switches but its a hectic job and practically not feasible. Any MCY=U such as ESP32 may be used for providing inputs.
+MCU or FPGA for providing the 16-bit input (instruction code) to CPU. Input may be applied via switches but its a hectic job and practically not feasible. Any MCU such as ESP32 may be used for providing inputs.
