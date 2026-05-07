@@ -16,8 +16,8 @@ module krv8cpu (
     // --- Sign Extension Logic ---
     // Let's assume bits [5:0] are a 6-bit signed immediate.
     // We "extend" bit 5 to the 8-bit width.
-    wire [7:0] imm_extended = { {2{instruction[5]}}, instruction[5:0] };
-    
+   // wire [7:0] imm_extended = { {2{instruction[5]}}, instruction[5:0] };
+     wire [7:0] imm_extended = instruction[7:0];
     // Standard 8-bit operand for logic ops
     wire [7:0] raw_imm = instruction[7:0];
 
@@ -59,7 +59,8 @@ module krv8cpu (
                 // Shift Operations
                 SLI: acc <= acc << instruction[2:0]; // Shift by 3-bit immediate
                 SRI: acc <= acc >> instruction[2:0];
-
+                SLL: acc <= acc << registers[rs1];
+                SRL: acc <= acc >> registers[rs1];
                 // Data Movement
                 STA: if (rs1 != 2'b00) registers[rs1] <= acc;
                 OUT: out_port <= acc;
